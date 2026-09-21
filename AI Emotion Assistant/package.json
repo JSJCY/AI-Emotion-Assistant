@@ -1,6 +1,6 @@
 {
   "name": "ai-emotion-assistant",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Safety-first MVP backend for AI Emotion Assistant",
@@ -13,10 +13,12 @@
     "start": "node dist/server.js",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "biome check src test",
-    "format": "biome format --write src test",
+    "lint": "biome check src test scripts",
+    "format": "biome format --write src test scripts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:live-model": "tsx scripts/live-model-smoke.ts",
+    "eval:live": "tsx scripts/run-live-eval.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
@@ -31,4 +33,3 @@
     "vitest": "5.0.1"
   }
 }
-

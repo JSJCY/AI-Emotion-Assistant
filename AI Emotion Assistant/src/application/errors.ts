@@ -1,7 +1,11 @@
 export type ApplicationErrorCode =
   | "SAFETY_CLASSIFIER_UNAVAILABLE"
   | "GENERATOR_UNAVAILABLE"
-  | "UNSAFE_MODEL_OUTPUT";
+  | "UNSAFE_MODEL_OUTPUT"
+  | "MODEL_PROVIDER_UNAVAILABLE"
+  | "MODEL_PROVIDER_AUTH_FAILED"
+  | "MODEL_REQUEST_TIMEOUT"
+  | "MODEL_RESPONSE_INVALID";
 
 export class ApplicationError extends Error {
   constructor(

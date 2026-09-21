@@ -42,7 +42,7 @@ export function buildFixedSafetyResponse(
       known_facts: [],
       unverified_inferences: [],
       question: "你现在能否先联系 110、120，或让一位可信任的人立即来到你身边？",
-      artifact: { type: "none", content: {} },
+      artifact: { type: "none", content: { title: null, body: null, steps: [] } },
       safety_action: "SHOW_EMERGENCY_CN",
       actions: [
         { code: "CALL_110", label: "拨打 110" },
@@ -65,7 +65,7 @@ export function buildFixedSafetyResponse(
       known_facts: [],
       unverified_inferences: [],
       question: "你现在能否先停止单独接触，并把情况告诉一位可信任的成年人？",
-      artifact: { type: "none", content: {} },
+      artifact: { type: "none", content: { title: null, body: null, steps: [] } },
       safety_action: "SHOW_MINOR_BOUNDARY",
       actions: [
         { code: "CONTACT_TRUSTED_PERSON", label: "联系可信任的成年人" },
@@ -85,7 +85,7 @@ export function buildFixedSafetyResponse(
     known_facts: [],
     unverified_inferences: [],
     question: "你现在是否有立即伤害自己或他人的可能，或者已经有人受伤？",
-    artifact: { type: "none", content: {} },
+    artifact: { type: "none", content: { title: null, body: null, steps: [] } },
     safety_action: "ASK_IMMEDIATE_DANGER",
     actions: [
       { code: "CONTACT_TRUSTED_PERSON", label: "联系可信任的人" },

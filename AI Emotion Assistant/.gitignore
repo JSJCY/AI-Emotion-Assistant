@@ -4,7 +4,7 @@ dist/
 .env.*
 !.env.example
 coverage/
+evals/results/
 *.log
 data/*.db
 data/*.db-*
-

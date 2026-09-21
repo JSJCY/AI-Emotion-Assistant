@@ -1,6 +1,6 @@
 # AI Emotion Assistant — MVP Backend
 
-安全优先的 TypeScript 后端。目前完成 Phase 1：工程骨架、确定性风险规则、固定安全响应和自动测试。真实百炼模型与 SQLite 将在下一增量接入。
+安全优先的 TypeScript 后端。目前完成 Phase 2 代码实现：工程骨架、确定性风险规则、固定安全响应、百炼双模型适配器、结构化输出和自动测试。真实百炼调用等待本机凭据验证；SQLite 尚未接入。
 
 ## 环境
 
@@ -16,12 +16,22 @@ npm run check
 npm run dev
 ```
 
+在启用百炼前，编辑本机 `.env`：
+
+```env
+MODEL_PROVIDER=dashscope
+DASHSCOPE_API_KEY=你的百炼APIKey
+DASHSCOPE_BASE_URL=https://你的工作区ID.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+```
+
+北京地域当前使用工作区专属兼容地址。不要把 Key 发到聊天、写入源码或提交到 Git。
+
 默认监听 `http://127.0.0.1:3000`。
 
 ## 接口
 
 - `GET /health`：进程存活检查。
-- `GET /ready`：模型与事件存储依赖检查；Phase 1 预期返回 503。
+- `GET /ready`：模型与事件存储依赖检查；SQLite 未接入前仍返回 503。
 - `POST /api/v1/respond`：情绪支持请求入口。
 
 请求示例：
@@ -34,11 +44,12 @@ npm run dev
 }
 ```
 
-Phase 1 行为：
+当前行为：
 
 - 本地规则命中 L2/L3 或未成年人高风险边界时，返回服务端固定安全响应。
-- 其他输入因为独立风险分类器尚未接入，返回 `503 SAFETY_CLASSIFIER_UNAVAILABLE`。
-- 这是 fail-closed 行为，不是故障降级文案。
+- `MODEL_PROVIDER=disabled` 时，其他输入返回 `503 SAFETY_CLASSIFIER_UNAVAILABLE`。
+- `MODEL_PROVIDER=dashscope` 时，其他输入依次调用独立风险分类和主生成模型，并经过运行时 Schema 与输出审核。
+- 供应商超时、认证失败和无效响应只返回稳定错误码，不回显供应商响应正文。
 
 ## 质量命令
 
@@ -50,6 +61,15 @@ npm run build
 npm run check
 ```
 
+填好本机 `.env` 后，按顺序运行真实测试：
+
+```powershell
+npm run test:live-model
+npm run eval:live
+```
+
+`test:live-model` 只运行两个合成冒烟案例。确认通过后再运行 60 条评测；评测报告写入 `evals/results/`，该目录不会提交到 Git。自动门禁通过后仍需按照 `evals/scoring-rubric-v0.1.md` 完成人工评分。
+
 ## 安全约束
 
 - 不在客户端或 Git 中保存 `DASHSCOPE_API_KEY`。
@@ -57,4 +77,3 @@ npm run check
 - 普通生成必须经过独立风险分类和输出审核。
 - L2/L3 安全流程不得依赖主生成模型。
 - `.env`、数据库、构建产物和覆盖率文件均被 Git 忽略。
-

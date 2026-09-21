@@ -1,37 +1,16 @@
-import { RespondUseCase } from "./application/respond-use-case.js";
+import { buildRuntime } from "./bootstrap.js";
 import { loadConfig } from "./infrastructure/config.js";
-import {
-  DisabledResponseGenerator,
-  DisabledRiskClassifier,
-} from "./infrastructure/disabled-model-adapters.js";
-import {
-  BlockAllOutputAuditor,
-  NoopEventRepository,
-} from "./infrastructure/safe-default-adapters.js";
-import { SystemClock } from "./infrastructure/system-clock.js";
+import { loadLocalEnv } from "./infrastructure/load-local-env.js";
 import { buildApp } from "./interfaces/http/app.js";
 
 async function main(): Promise<void> {
+  loadLocalEnv();
   const config = loadConfig();
-
-  if (config.MODEL_PROVIDER !== "disabled") {
-    throw new Error("MODEL_PROVIDER=dashscope is reserved for the next implementation increment.");
-  }
-
-  const respondUseCase = new RespondUseCase({
-    riskClassifier: new DisabledRiskClassifier(),
-    responseGenerator: new DisabledResponseGenerator(),
-    outputAuditor: new BlockAllOutputAuditor(),
-    eventRepository: new NoopEventRepository(),
-    clock: new SystemClock(),
-  });
+  const runtime = buildRuntime(config);
 
   const app = buildApp({
-    respondUseCase,
-    readiness: {
-      modelProvider: false,
-      eventStore: false,
-    },
+    respondUseCase: runtime.respondUseCase,
+    readiness: runtime.readiness,
     logger: {
       level: config.LOG_LEVEL,
       redact: {

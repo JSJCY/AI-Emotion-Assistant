@@ -42,6 +42,12 @@ const RULES: readonly Rule[] = [
   {
     level: "L2",
     signal: "SELF_HARM",
+    immediateDanger: true,
+    patterns: [/(?:刚刚|刚才).{0,8}伤害了?自己/u],
+  },
+  {
+    level: "L2",
+    signal: "SELF_HARM",
     immediateDanger: false,
     patterns: [
       /(?:消失就好了|不想活|伤害了?自己|坚持不到明天|结束一切|无法挽回)/u,

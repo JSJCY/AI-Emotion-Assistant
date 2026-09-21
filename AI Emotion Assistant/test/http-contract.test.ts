@@ -41,7 +41,7 @@ describe("HTTP contract", () => {
     const ready = await app.inject({ method: "GET", url: "/ready" });
 
     expect(health.statusCode).toBe(200);
-    expect(health.json()).toMatchObject({ status: "ok", version: "0.1.0" });
+    expect(health.json()).toMatchObject({ status: "ok", version: "0.2.0" });
     expect(ready.statusCode).toBe(503);
     expect(ready.json()).toMatchObject({
       status: "not_ready",

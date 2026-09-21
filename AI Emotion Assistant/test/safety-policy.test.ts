@@ -41,4 +41,16 @@ describe("safety policy", () => {
     expect(response.safety_action).toBe("SHOW_MINOR_BOUNDARY");
     expect(response.acknowledgement).not.toContain("照片");
   });
+
+  it("routes a recent injury to emergency while preserving an L2 classification", () => {
+    const risk = assessment({
+      level: "L2",
+      signals: ["SELF_HARM"],
+      immediateDanger: true,
+    });
+
+    const response = buildFixedSafetyResponse("request-3", risk);
+    expect(response.route).toBe("EMERGENCY_CN");
+    expect(response.risk_level).toBe("L2");
+  });
 });

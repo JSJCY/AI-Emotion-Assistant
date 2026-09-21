@@ -21,3 +21,4 @@ AI Emotion Assistant 是一个面向日常情绪压力场景的 AI 表达与行�
 4. Figma 可交互原型：Version 1 已完成并验证行动、表达、隐私与安全路径；链接与已知问题见 `docs/04-design/figma-delivery-and-qa-result.md`。
 5. MVP 技术决策：已确认模型/API/存储方案；60 条首版合成评测集、评分标准与内测门槛已建立，等待接入实现后运行基线。
 6. MVP 后端 Phase 1：TypeScript/Fastify 工程骨架、确定性安全链路、固定安全响应和 22 个自动测试已完成；真实百炼适配器与 SQLite 尚未接入。
+7. MVP 后端 Phase 2：百炼双模型适配、严格 JSON Schema、输出审核、真实冒烟脚本和 60 条评测 runner 已实现；真实账号连通性等待本机凭据验证，SQLite 尚未接入。

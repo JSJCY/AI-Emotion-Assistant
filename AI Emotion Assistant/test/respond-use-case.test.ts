@@ -27,7 +27,7 @@ function createDependencies() {
       known_facts: ["你今天在会议中被否定。"],
       unverified_inferences: [],
       question: "你想先继续说说，还是一起想下一步？",
-      artifact: { type: "none", content: {} },
+      artifact: { type: "none", content: { title: null, body: null, steps: [] } },
       safety_action: "NONE",
     }),
   };

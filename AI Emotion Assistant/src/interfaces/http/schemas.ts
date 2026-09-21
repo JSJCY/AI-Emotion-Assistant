@@ -40,7 +40,11 @@ export const respondResultSchema = z.object({
   question: z.string().nullable(),
   artifact: z.object({
     type: z.enum(["none", "situation_card", "expression_draft", "action_card"]),
-    content: z.record(z.string(), z.unknown()),
+    content: z.object({
+      title: z.string().nullable(),
+      body: z.string().nullable(),
+      steps: z.array(z.string()),
+    }),
   }),
   safety_action: z.enum([
     "NONE",

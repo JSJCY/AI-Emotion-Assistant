@@ -24,7 +24,7 @@ export function buildApp(options: BuildAppOptions) {
   app.get("/health", async () => ({
     status: "ok",
     service: "ai-emotion-assistant",
-    version: "0.1.0",
+    version: "0.2.0",
   }));
 
   app.get("/ready", async (_request, reply) => {

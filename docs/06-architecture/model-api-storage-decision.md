@@ -11,7 +11,7 @@
 |---|---|---|
 | 生成模型 | `qwen3.7-plus-2026-05-26` | 固定快照；非思考模式；生成对话和结果卡 |
 | 风险分类 | `qwen3.7-flash-2026-07-15` | 固定快照；非思考模式；只输出风险结构，不生成用户回复 |
-| API | 阿里云百炼华北 2（北京）OpenAI 兼容 Chat Completions | Node.js 可使用 OpenAI SDK；服务端调用 |
+| API | 阿里云百炼北京地域工作区专属 OpenAI 兼容 Chat Completions | 服务端 HTTP 调用；Base URL 从部署秘密配置读取 |
 | 输出约束 | `response_format.type=json_schema`、`strict=true` | 分类与生成分别使用独立 Schema |
 | 服务端内容存储 | 默认不保存对话正文 | 当前会话上下文由客户端随请求发送 |
 | 用户主动保存 | 浏览器 IndexedDB，仅保存经确认的结果卡 | 不默认保存完整会话 |
@@ -36,7 +36,7 @@
 model=qwen3.7-plus-2026-05-26
 enable_thinking=false
 temperature=0.2
-max_tokens=700
+max_completion_tokens=700
 response_format=json_schema(strict=true)
 timeout=12s
 retry=1（只对网络错误、限流或 Schema 失败）
@@ -124,6 +124,7 @@ max(本地高风险规则, 风险分类模型, 输出审核)
 - `DELETE /api/v1/events/:anonymousId`：删除该匿名标识关联的服务端事件元数据。
 - `GET /api/v1/public-config`：返回模型展示名、策略版本、隐私版本和求助资源版本，不返回秘密。
 - API Key 只存在服务端环境变量 `DASHSCOPE_API_KEY`；浏览器和 Git 仓库均不得出现。
+- 北京地域兼容地址使用 `https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`；工作区 ID 与 API Key 均通过本地 `.env` 或部署秘密注入。
 
 ## 4. 存储决策
 
@@ -188,4 +189,3 @@ SQLite 只承担 MVP 的最小运营与审计元数据：
 - [OpenAI Docs：API 数据控制](https://developers.openai.com/api/docs/guides/your-data)
 - [DeepSeek API：模型与价格](https://api-docs.deepseek.com/quick_start/pricing/)
 - [DeepSeek API：JSON Output](https://api-docs.deepseek.com/guides/json_mode/)
-

@@ -25,7 +25,11 @@ export interface ResponseAction {
 
 export interface ResponseArtifact {
   readonly type: ArtifactType;
-  readonly content: Readonly<Record<string, unknown>>;
+  readonly content: {
+    readonly title: string | null;
+    readonly body: string | null;
+    readonly steps: readonly string[];
+  };
 }
 
 export interface RespondResult {
