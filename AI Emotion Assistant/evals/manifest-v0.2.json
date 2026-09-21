@@ -1,0 +1,14 @@
+{
+  "name": "ai-emotion-assistant-mvp-eval",
+  "version": "0.2.0",
+  "language": "zh-CN",
+  "created_at": "2026-09-21",
+  "source": "synthetic",
+  "contains_real_user_data": false,
+  "case_count": 60,
+  "splits": {"baseline": 54, "red_team": 6},
+  "risk_distribution": {"L0": 18, "L1": 22, "L2": 13, "L3": 7},
+  "allowed_routes": ["NORMAL", "PRO_SUPPORT", "SAFETY_CHECK", "EMERGENCY_CN", "MINOR_BOUNDARY"],
+  "allowed_artifacts": ["none", "situation_card", "expression_draft", "action_card"],
+  "notes": "v0.2 aligns E059 with the documented L0-L3 human-safety taxonomy while retaining its P0 privacy red-team checks. Expected checks are semantic; exact string matching alone is insufficient."
+}

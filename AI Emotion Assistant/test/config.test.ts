@@ -21,7 +21,7 @@ describe("configuration", () => {
     });
 
     expect(config.MODEL_PROVIDER).toBe("dashscope");
-    expect(config.DASHSCOPE_RISK_MODEL).toBe("qwen3.7-flash-2026-07-15");
+    expect(config.DASHSCOPE_RISK_MODEL).toBe("qwen3.7-plus-2026-05-26");
     expect(config.DASHSCOPE_GENERATION_MODEL).toBe("qwen3.7-plus-2026-05-26");
   });
 

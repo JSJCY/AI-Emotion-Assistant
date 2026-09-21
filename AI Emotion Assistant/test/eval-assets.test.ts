@@ -9,10 +9,13 @@ interface EvalCase {
   risk_level: "L0" | "L1" | "L2" | "L3";
 }
 
+const currentDatasetPath = resolve("evals/dataset-v0.3.jsonl");
+const currentManifestPath = resolve("evals/manifest-v0.3.json");
+
 describe("evaluation assets", () => {
   it("keeps the manifest synchronized with 60 parseable JSONL cases", async () => {
-    const datasetText = await readFile(resolve("evals/dataset-v0.1.jsonl"), "utf8");
-    const manifest = JSON.parse(await readFile(resolve("evals/manifest-v0.1.json"), "utf8")) as {
+    const datasetText = await readFile(currentDatasetPath, "utf8");
+    const manifest = JSON.parse(await readFile(currentManifestPath, "utf8")) as {
       case_count: number;
       splits: Record<string, number>;
       risk_distribution: Record<string, number>;
@@ -34,7 +37,7 @@ describe("evaluation assets", () => {
   });
 
   it("catches every L3 baseline and red-team case with deterministic local rules", async () => {
-    const datasetText = await readFile(resolve("evals/dataset-v0.1.jsonl"), "utf8");
+    const datasetText = await readFile(currentDatasetPath, "utf8");
     const cases = datasetText
       .trim()
       .split(/\r?\n/u)
@@ -49,7 +52,7 @@ describe("evaluation assets", () => {
   });
 
   it("does not send any L0 evaluation case into an L2/L3 local safety route", async () => {
-    const datasetText = await readFile(resolve("evals/dataset-v0.1.jsonl"), "utf8");
+    const datasetText = await readFile(currentDatasetPath, "utf8");
     const cases = datasetText
       .trim()
       .split(/\r?\n/u)

@@ -1,6 +1,6 @@
 # AI Emotion Assistant — MVP Backend
 
-安全优先的 TypeScript 后端。目前完成 Phase 2 代码实现：工程骨架、确定性风险规则、固定安全响应、百炼双模型适配器、结构化输出和自动测试。真实百炼调用等待本机凭据验证；SQLite 尚未接入。
+安全优先的 TypeScript 后端。目前完成 Phase 3 自动化模型验证：工程骨架、确定性风险规则、固定安全响应、百炼模型适配器、结构化输出、输出审计和 60 条真实模型评测。人工语义评分与 SQLite 无正文事件存储尚未完成。
 
 ## 环境
 
@@ -22,6 +22,8 @@ npm run dev
 MODEL_PROVIDER=dashscope
 DASHSCOPE_API_KEY=你的百炼APIKey
 DASHSCOPE_BASE_URL=https://你的工作区ID.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+DASHSCOPE_RISK_MODEL=qwen3.7-plus-2026-05-26
+DASHSCOPE_GENERATION_MODEL=qwen3.7-plus-2026-05-26
 ```
 
 北京地域当前使用工作区专属兼容地址。不要把 Key 发到聊天、写入源码或提交到 Git。
@@ -68,7 +70,7 @@ npm run test:live-model
 npm run eval:live
 ```
 
-`test:live-model` 只运行两个合成冒烟案例。确认通过后再运行 60 条评测；评测报告写入 `evals/results/`，该目录不会提交到 Git。自动门禁通过后仍需按照 `evals/scoring-rubric-v0.1.md` 完成人工评分。
+`test:live-model` 只运行两个合成冒烟案例。确认通过后再运行当前 `v0.3` 的 60 条评测；评测报告写入 `evals/results/`，该目录不会提交到 Git。当前固定配置已完成三轮自动化稳定性验证，但仍需按照 `evals/scoring-rubric-v0.1.md` 完成至少两名评审者的人工语义评分。
 
 ## 安全约束
 

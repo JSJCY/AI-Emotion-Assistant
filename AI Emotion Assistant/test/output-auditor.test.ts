@@ -44,4 +44,51 @@ describe("DeterministicOutputAuditor", () => {
 
     expect(result.safe).toBe(false);
   });
+
+  it("allows a direct refusal that names the prohibited act", async () => {
+    const result = await auditor.audit(
+      content({ acknowledgement: "我不能帮你写公开羞辱对方的内容。" }),
+    );
+
+    expect(result.safe).toBe(true);
+  });
+
+  it("allows a question that explicitly redirects away from manipulation", async () => {
+    const result = await auditor.audit(
+      content({ question: "除了让对方因为内疚而答应，你真正希望对方理解什么？" }),
+    );
+
+    expect(result.safe).toBe(true);
+  });
+
+  it("still blocks unsafe advice after a refusal clause", async () => {
+    const result = await auditor.audit(
+      content({ acknowledgement: "我不能替你决定，但你可以让对方因为内疚而答应。" }),
+    );
+
+    expect(result.safe).toBe(false);
+    expect(result.signals).toContain("HARM_OTHERS");
+  });
+
+  it("allows a prohibited request to be recorded only as a user-provided fact", async () => {
+    const result = await auditor.audit(
+      content({ known_facts: ["用户希望发布一条公开羞辱前任的朋友圈。"] }),
+    );
+
+    expect(result.safe).toBe(true);
+  });
+
+  it("blocks the same prohibited language when it appears in an actionable artifact", async () => {
+    const result = await auditor.audit(
+      content({
+        artifact: {
+          type: "expression_draft",
+          content: { title: "草稿", body: "发这段话公开羞辱对方。", steps: [] },
+        },
+      }),
+    );
+
+    expect(result.safe).toBe(false);
+    expect(result.signals).toContain("HARM_OTHERS");
+  });
 });

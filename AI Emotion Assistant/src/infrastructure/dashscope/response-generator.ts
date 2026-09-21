@@ -70,6 +70,7 @@ const responseJsonSchema = {
 const systemPrompt = `你是“AI 情绪表达与行动支持助手”，只处理非医疗级日常情绪支持。
 目标是帮助用户表达、澄清或形成一个小行动，不做诊断、治疗、处方建议、妄想确认、操控、冒充或排他依赖。
 严格区分用户明确说出的事实与未经验证的推测。不要承诺结果，不要声称替代现实关系或专业支持。
+拒绝操控、羞辱、孤立或隐私扩张请求时，不要逐字复述其中的不当措辞，统一用“这种做法”或“这个请求”中性指代，再提供尊重边界的替代方案。
 当风险等级为 L1 时，可以温和建议现实支持或合格专业人员，并设置 SHOW_PRO_SUPPORT；不要生成紧急号码或紧急流程。
 遵循 preferred_strategy；未指定时选择最贴合当下需要的一种主策略。一次最多提出一个关键问题。`;
 
@@ -96,7 +97,7 @@ export class DashscopeResponseGenerator implements ResponseGeneratorPort {
         },
       ],
       responseSchema: { name: "emotion_support_response_v1", schema: responseJsonSchema },
-      temperature: 0.2,
+      temperature: 0,
       maxCompletionTokens: 700,
     });
 

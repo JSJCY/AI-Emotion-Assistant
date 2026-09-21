@@ -27,7 +27,7 @@ const configSchema = z
         })
         .optional(),
     ),
-    DASHSCOPE_RISK_MODEL: z.string().min(1).default("qwen3.7-flash-2026-07-15"),
+    DASHSCOPE_RISK_MODEL: z.string().min(1).default("qwen3.7-plus-2026-05-26"),
     DASHSCOPE_GENERATION_MODEL: z.string().min(1).default("qwen3.7-plus-2026-05-26"),
     MODEL_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(12_000),
     MODEL_MAX_RETRIES: z.coerce.number().int().min(0).max(1).default(1),

@@ -5,6 +5,8 @@ import type { SignalCode } from "../domain/risk.js";
 interface AuditRule {
   readonly signal?: SignalCode;
   readonly pattern: RegExp;
+  readonly allowNegated?: boolean;
+  readonly includeKnownFacts?: boolean;
 }
 
 const prohibitedRules: readonly AuditRule[] = [
@@ -27,6 +29,8 @@ const prohibitedRules: readonly AuditRule[] = [
   {
     signal: "HARM_OTHERS",
     pattern: /(?:让.{0,12}内疚|威胁.{0,12}答应|一起孤立|公开羞辱)/u,
+    allowNegated: true,
+    includeKnownFacts: false,
   },
   {
     pattern: /1[3-9]\d{9}/u,
@@ -35,9 +39,8 @@ const prohibitedRules: readonly AuditRule[] = [
 
 export class DeterministicOutputAuditor implements OutputAuditorPort {
   audit(content: GeneratedContent): Promise<OutputAuditResult> {
-    const text = [
+    const generatedText = [
       content.acknowledgement,
-      ...content.known_facts,
       ...content.unverified_inferences,
       content.question ?? "",
       content.artifact.content.title ?? "",
@@ -45,7 +48,13 @@ export class DeterministicOutputAuditor implements OutputAuditorPort {
       ...content.artifact.content.steps,
     ].join("\n");
 
-    const matches = prohibitedRules.filter((rule) => rule.pattern.test(text));
+    const matches = prohibitedRules.filter((rule) => {
+      const text =
+        rule.includeKnownFacts === false
+          ? generatedText
+          : [generatedText, ...content.known_facts].join("\n");
+      return matchesProhibitedRule(text, rule);
+    });
     return Promise.resolve({
       safe: matches.length === 0,
       signals: [
@@ -57,4 +66,20 @@ export class DeterministicOutputAuditor implements OutputAuditorPort {
       ],
     });
   }
+}
+
+const refusalPrefix =
+  /(?:不能|不会|无法|不建议|不应该|不要|拒绝|避免|除了|不靠|不通过)[^。！？；，,\n]{0,30}$/u;
+
+function matchesProhibitedRule(text: string, rule: AuditRule): boolean {
+  return text.split(/[。！？；，,\n]+/u).some((clause) => {
+    const match = rule.pattern.exec(clause);
+    if (match === null) {
+      return false;
+    }
+    if (rule.allowNegated !== true) {
+      return true;
+    }
+    return !refusalPrefix.test(clause.slice(0, match.index));
+  });
 }
