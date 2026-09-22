@@ -23,6 +23,7 @@ describe("DashScope HTTP integration with mocked provider", () => {
   });
 
   it("runs classification, generation, output audit, and HTTP serialization end to end", async () => {
+    const anonymousId = "550e8400-e29b-41d4-a716-446655440000";
     const fetchMock = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(
@@ -61,6 +62,7 @@ describe("DashScope HTTP integration with mocked provider", () => {
     );
     const app = buildApp({
       respondUseCase: runtime.respondUseCase,
+      dataLifecycleUseCase: runtime.dataLifecycleUseCase,
       readiness: runtime.readiness,
     });
 
@@ -75,6 +77,7 @@ describe("DashScope HTTP integration with mocked provider", () => {
       const response = await app.inject({
         method: "POST",
         url: "/api/v1/respond",
+        headers: { "x-anonymous-id": anonymousId },
         payload: {
           message: "今天开会时我被当众否定了，真的很难受。",
           preferred_strategy: "listen",
@@ -92,6 +95,46 @@ describe("DashScope HTTP integration with mocked provider", () => {
         },
       });
       expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      const exported = await app.inject({
+        method: "GET",
+        url: "/api/v1/events/export",
+        headers: { "x-anonymous-id": anonymousId },
+      });
+      expect(exported.statusCode).toBe(200);
+      expect(exported.body).not.toContain(anonymousId);
+      expect(exported.body).not.toContain("今天开会时我被当众否定了");
+      expect(exported.json()).toMatchObject({
+        version: "event-export-v1",
+        events: [
+          {
+            risk_level: "L0",
+            signal_codes: ["NONE"],
+            route: "NORMAL",
+            model_provider: "dashscope",
+          },
+        ],
+      });
+
+      const deleted = await app.inject({
+        method: "DELETE",
+        url: "/api/v1/events",
+        headers: { "x-anonymous-id": anonymousId },
+      });
+      expect(deleted.statusCode).toBe(200);
+      expect(deleted.json()).toMatchObject({
+        version: "deletion-receipt-v1",
+        scope: "response_events",
+        deleted_event_count: 1,
+      });
+
+      const afterDeletion = await app.inject({
+        method: "GET",
+        url: "/api/v1/events/export",
+        headers: { "x-anonymous-id": anonymousId },
+      });
+      expect(afterDeletion.statusCode).toBe(200);
+      expect(afterDeletion.json().events).toEqual([]);
     } finally {
       await app.close();
       await runtime.close();

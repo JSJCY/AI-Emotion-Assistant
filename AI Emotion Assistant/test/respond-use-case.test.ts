@@ -36,6 +36,15 @@ function createDependencies() {
   };
   const eventRepository: EventRepositoryPort = {
     recordResponse: vi.fn().mockResolvedValue(undefined),
+    listResponses: vi.fn().mockResolvedValue([]),
+    deleteResponses: vi.fn().mockImplementation((command) =>
+      Promise.resolve({
+        receiptId: command.receiptId,
+        scope: "response_events",
+        deletedEventCount: 0,
+        completedAt: command.completedAt,
+      }),
+    ),
     isReady: vi.fn().mockResolvedValue(true),
     close: vi.fn().mockResolvedValue(undefined),
   };

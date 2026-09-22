@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const anonymousIdSchema = z.string().uuid();
+
 const conversationTurnSchema = z.object({
   role: z.enum(["user", "assistant"]),
   content: z.string().trim().min(1).max(4_000),
@@ -54,4 +56,51 @@ export const respondResultSchema = z.object({
     "SHOW_MINOR_BOUNDARY",
   ]),
   actions: z.array(actionSchema),
+});
+
+const exportedResponseEventSchema = z.object({
+  request_id: z.string().min(1),
+  risk_level: z.enum(["L0", "L1", "L2", "L3"]),
+  signal_codes: z.array(
+    z.enum([
+      "SELF_HARM",
+      "HARM_OTHERS",
+      "ABUSE",
+      "MEDICAL",
+      "DELUSION",
+      "MINOR",
+      "DISTRESS",
+      "NONE",
+    ]),
+  ),
+  route: z.enum(["NORMAL", "PRO_SUPPORT", "SAFETY_CHECK", "EMERGENCY_CN", "MINOR_BOUNDARY"]),
+  safety_action: z.enum([
+    "NONE",
+    "SHOW_PRO_SUPPORT",
+    "ASK_IMMEDIATE_DANGER",
+    "SHOW_EMERGENCY_CN",
+    "SHOW_MINOR_BOUNDARY",
+  ]),
+  duration_ms: z.number().nonnegative(),
+  app_version: z.string().min(1),
+  risk_policy_version: z.string().min(1),
+  response_prompt_version: z.string().min(1),
+  model_provider: z.enum(["disabled", "dashscope"]),
+  risk_model: z.string().nullable(),
+  generation_model: z.string().nullable(),
+  created_at: z.string().datetime(),
+});
+
+export const eventExportResultSchema = z.object({
+  version: z.literal("event-export-v1"),
+  exported_at: z.string().datetime(),
+  events: z.array(exportedResponseEventSchema),
+});
+
+export const deletionReceiptSchema = z.object({
+  version: z.literal("deletion-receipt-v1"),
+  receipt_id: z.string().uuid(),
+  scope: z.literal("response_events"),
+  deleted_event_count: z.number().int().nonnegative(),
+  completed_at: z.string().datetime(),
 });

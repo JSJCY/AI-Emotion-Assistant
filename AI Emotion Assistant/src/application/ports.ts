@@ -50,8 +50,31 @@ export interface ResponseEvent {
 
 export interface EventRepositoryPort {
   recordResponse(event: ResponseEvent): Promise<void>;
+  listResponses(anonymousIdHash: string): Promise<readonly ResponseEvent[]>;
+  deleteResponses(command: DeleteEventsCommand): Promise<DeletionReceipt>;
   isReady(): Promise<boolean>;
   close(): Promise<void>;
+}
+
+export interface DeleteEventsCommand {
+  readonly receiptId: string;
+  readonly anonymousIdHash: string;
+  readonly completedAt: string;
+}
+
+export interface DeletionReceipt {
+  readonly receiptId: string;
+  readonly scope: "response_events";
+  readonly deletedEventCount: number;
+  readonly completedAt: string;
+}
+
+export interface AnonymousIdentifierHasherPort {
+  hash(anonymousId: string): string;
+}
+
+export interface IdGeneratorPort {
+  next(): string;
 }
 
 export interface ResponseEventMetadata {

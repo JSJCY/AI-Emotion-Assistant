@@ -1,7 +1,14 @@
-import Fastify, { type FastifyServerOptions } from "fastify";
+import Fastify, { type FastifyReply, type FastifyServerOptions } from "fastify";
+import type { DataLifecycleUseCase } from "../../application/data-lifecycle-use-case.js";
 import { ApplicationError } from "../../application/errors.js";
 import type { RespondUseCase } from "../../application/respond-use-case.js";
-import { respondRequestSchema, respondResultSchema } from "./schemas.js";
+import {
+  anonymousIdSchema,
+  deletionReceiptSchema,
+  eventExportResultSchema,
+  respondRequestSchema,
+  respondResultSchema,
+} from "./schemas.js";
 
 export interface ReadinessState {
   readonly modelProvider: boolean;
@@ -10,6 +17,7 @@ export interface ReadinessState {
 
 export interface BuildAppOptions {
   readonly respondUseCase: RespondUseCase;
+  readonly dataLifecycleUseCase: DataLifecycleUseCase;
   readonly readiness: ReadinessState;
   readonly logger?: FastifyServerOptions["logger"];
 }
@@ -55,16 +63,72 @@ export function buildApp(options: BuildAppOptions) {
       });
     }
 
+    const anonymousId = parseAnonymousIdHeader(request.headers["x-anonymous-id"]);
+    if (anonymousId === "invalid") {
+      return invalidAnonymousIdResponse(reply, request.id);
+    }
+
     const result = await options.respondUseCase.execute({
       requestId: request.id,
       message: parsed.data.message,
       context: parsed.data.context,
+      ...(anonymousId === undefined
+        ? {}
+        : { anonymousIdHash: options.dataLifecycleUseCase.hashAnonymousId(anonymousId) }),
       ...(parsed.data.preferred_strategy === undefined
         ? {}
         : { preferredStrategy: parsed.data.preferred_strategy }),
     });
 
     return reply.code(200).send(respondResultSchema.parse(result));
+  });
+
+  app.get("/api/v1/events/export", async (request, reply) => {
+    const anonymousId = parseAnonymousIdHeader(request.headers["x-anonymous-id"]);
+    if (anonymousId === undefined || anonymousId === "invalid") {
+      return invalidAnonymousIdResponse(reply, request.id);
+    }
+
+    const result = await options.dataLifecycleUseCase.exportEvents(anonymousId);
+    return reply.code(200).send(
+      eventExportResultSchema.parse({
+        version: result.version,
+        exported_at: result.exportedAt,
+        events: result.events.map((event) => ({
+          request_id: event.requestId,
+          risk_level: event.riskLevel,
+          signal_codes: event.signalCodes,
+          route: event.route,
+          safety_action: event.safetyAction,
+          duration_ms: event.durationMs,
+          app_version: event.appVersion,
+          risk_policy_version: event.riskPolicyVersion,
+          response_prompt_version: event.responsePromptVersion,
+          model_provider: event.modelProvider,
+          risk_model: event.riskModel,
+          generation_model: event.generationModel,
+          created_at: event.createdAt,
+        })),
+      }),
+    );
+  });
+
+  app.delete("/api/v1/events", async (request, reply) => {
+    const anonymousId = parseAnonymousIdHeader(request.headers["x-anonymous-id"]);
+    if (anonymousId === undefined || anonymousId === "invalid") {
+      return invalidAnonymousIdResponse(reply, request.id);
+    }
+
+    const receipt = await options.dataLifecycleUseCase.deleteEvents(anonymousId);
+    return reply.code(200).send(
+      deletionReceiptSchema.parse({
+        version: "deletion-receipt-v1",
+        receipt_id: receipt.receiptId,
+        scope: receipt.scope,
+        deleted_event_count: receipt.deletedEventCount,
+        completed_at: receipt.completedAt,
+      }),
+    );
   });
 
   app.setErrorHandler((error, request, reply) => {
@@ -89,4 +153,27 @@ export function buildApp(options: BuildAppOptions) {
   });
 
   return app;
+}
+
+function parseAnonymousIdHeader(
+  value: string | string[] | undefined,
+): string | "invalid" | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return "invalid";
+  }
+  const parsed = anonymousIdSchema.safeParse(value);
+  return parsed.success ? parsed.data : "invalid";
+}
+
+function invalidAnonymousIdResponse(reply: FastifyReply, requestId: string) {
+  return reply.code(400).send({
+    error: {
+      code: "INVALID_ANONYMOUS_ID",
+      message: "The x-anonymous-id header must be a valid UUID.",
+    },
+    request_id: requestId,
+  });
 }

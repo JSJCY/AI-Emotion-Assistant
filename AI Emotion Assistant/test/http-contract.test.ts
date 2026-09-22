@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { DataLifecycleUseCase } from "../src/application/data-lifecycle-use-case.js";
 import { RespondUseCase } from "../src/application/respond-use-case.js";
+import {
+  RandomUuidGenerator,
+  Sha256AnonymousIdentifierHasher,
+} from "../src/infrastructure/anonymous-identifier.js";
 import {
   DisabledResponseGenerator,
   DisabledRiskClassifier,
@@ -12,11 +17,12 @@ import { SystemClock } from "../src/infrastructure/system-clock.js";
 import { buildApp } from "../src/interfaces/http/app.js";
 
 function createApp() {
+  const eventRepository = new NoopEventRepository();
   const useCase = new RespondUseCase({
     riskClassifier: new DisabledRiskClassifier(),
     responseGenerator: new DisabledResponseGenerator(),
     outputAuditor: new BlockAllOutputAuditor(),
-    eventRepository: new NoopEventRepository(),
+    eventRepository,
     eventMetadata: {
       appVersion: "test",
       riskPolicyVersion: "risk-policy-test",
@@ -30,6 +36,12 @@ function createApp() {
 
   return buildApp({
     respondUseCase: useCase,
+    dataLifecycleUseCase: new DataLifecycleUseCase({
+      eventRepository,
+      identifierHasher: new Sha256AnonymousIdentifierHasher(),
+      idGenerator: new RandomUuidGenerator(),
+      clock: new SystemClock(),
+    }),
     readiness: { modelProvider: false, eventStore: () => Promise.resolve(false) },
   });
 }
@@ -103,5 +115,23 @@ describe("HTTP contract", () => {
 
     expect(response.statusCode).toBe(503);
     expect(response.json().error.code).toBe("SAFETY_CLASSIFIER_UNAVAILABLE");
+  });
+
+  it("rejects missing or invalid anonymous identifiers without echoing them", async () => {
+    const app = createApp();
+    apps.push(app);
+    const invalidId = "private-but-invalid-id";
+
+    const missing = await app.inject({ method: "GET", url: "/api/v1/events/export" });
+    const invalid = await app.inject({
+      method: "DELETE",
+      url: "/api/v1/events",
+      headers: { "x-anonymous-id": invalidId },
+    });
+
+    expect(missing.statusCode).toBe(400);
+    expect(invalid.statusCode).toBe(400);
+    expect(invalid.body).not.toContain(invalidId);
+    expect(invalid.json().error.code).toBe("INVALID_ANONYMOUS_ID");
   });
 });

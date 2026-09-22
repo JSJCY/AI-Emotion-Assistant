@@ -10,11 +10,12 @@ async function main(): Promise<void> {
 
   const app = buildApp({
     respondUseCase: runtime.respondUseCase,
+    dataLifecycleUseCase: runtime.dataLifecycleUseCase,
     readiness: runtime.readiness,
     logger: {
       level: config.LOG_LEVEL,
       redact: {
-        paths: ["req.headers.authorization", "req.headers.cookie"],
+        paths: ["req.headers.authorization", "req.headers.cookie", "req.headers.x-anonymous-id"],
         censor: "[REDACTED]",
       },
     },

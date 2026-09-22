@@ -102,7 +102,50 @@ describe("SqliteEventRepository", () => {
       const row = database
         .prepare("SELECT COUNT(*) AS count, MAX(version) AS version FROM schema_migrations")
         .get() as { count: number; version: number };
-      expect(row).toEqual({ count: 1, version: 1 });
+      expect(row).toEqual({ count: 2, version: 2 });
+    } finally {
+      database.close();
+    }
+  });
+
+  it("exports matching metadata and atomically records deletion receipts", async () => {
+    const databasePath = createDatabasePath();
+    const repository = new SqliteEventRepository(databasePath);
+    const anonymousIdHash = "a".repeat(64);
+    await repository.recordResponse(createEvent({ anonymousIdHash }));
+    await repository.recordResponse(
+      createEvent({ requestId: "req-other", anonymousIdHash: "b".repeat(64) }),
+    );
+
+    const beforeDeletion = await repository.listResponses(anonymousIdHash);
+    expect(beforeDeletion).toHaveLength(1);
+    expect(beforeDeletion[0]).toMatchObject({ requestId: "req-001", anonymousIdHash });
+
+    const receipt = await repository.deleteResponses({
+      receiptId: "9f8c44e2-641f-4f7f-96d2-31b18e6fe211",
+      anonymousIdHash,
+      completedAt: "2026-09-22T01:00:00.000Z",
+    });
+    expect(receipt).toEqual({
+      receiptId: "9f8c44e2-641f-4f7f-96d2-31b18e6fe211",
+      scope: "response_events",
+      deletedEventCount: 1,
+      completedAt: "2026-09-22T01:00:00.000Z",
+    });
+    expect(await repository.listResponses(anonymousIdHash)).toEqual([]);
+    expect(await repository.listResponses("b".repeat(64))).toHaveLength(1);
+    await repository.close();
+
+    const database = new DatabaseSync(databasePath, { readOnly: true });
+    try {
+      const storedReceipt = database.prepare("SELECT * FROM deletion_receipts").get() as {
+        anonymous_id_hash: string;
+        deleted_event_count: number;
+      };
+      expect(storedReceipt).toMatchObject({
+        anonymous_id_hash: anonymousIdHash,
+        deleted_event_count: 1,
+      });
     } finally {
       database.close();
     }
