@@ -160,6 +160,7 @@ SQLite 只承担 MVP 的最小运营与审计元数据：
 - 百炼默认审计日志记录请求元数据，不包含 Prompt/Response。
 - MVP 不开启记录完整 Prompt/Response 的推理日志，也不启用日志回流训练。
 - 如果排查问题必须临时采样正文，需要单独审批、明确比例与到期时间，并先去标识化。
+- 人工核验记录：2026-09-22，评审人森雨确认当前北京业务空间的完整 Prompt/Response 推理日志未开启。
 
 ## 5. 成本基线
 
@@ -182,7 +183,7 @@ SQLite 只承担 MVP 的最小运营与审计元数据：
 
 - 固定版本模型能否在当前百炼账号和北京地域调用。
 - `json_schema + strict=true + enable_thinking=false` 的实际返回兼容性。
-- Prompt/Response 推理日志确实未开启。
+- Prompt/Response 推理日志已确认未开启（2026-09-22，评审人：森雨）；配置变化后必须重新核验。
 - API Key 仅服务端可见，错误信息不回显请求正文。
 - SQLite 中不存在 `message_text`、`prompt`、`response` 等原文列。
 - 删除 IndexedDB、事件元数据和备份生命周期均有可复现测试。
