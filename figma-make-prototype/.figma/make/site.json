@@ -1,0 +1,10 @@
+{
+  "description": "This interactive web app helps young adults manage emotional pressure by guiding them to express feelings and take actionable steps, fostering clarity and support.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
