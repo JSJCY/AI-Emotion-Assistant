@@ -1,10 +1,10 @@
 # AI Emotion Assistant
 
-AI Emotion Assistant 是一个面向日常情绪压力场景的 AI 表达与行动支持产品项目。当前处于用户与产品定义阶段，所有结论均区分“桌面研究得出的假设”和“经真实用户验证的结论”。
+AI Emotion Assistant 是一个面向日常情绪压力场景的 AI 表达与行动支持产品项目。当前处于 MVP 工程实现与验证阶段，所有结论均区分“桌面研究得出的假设”、“自动化验证结果”和“经真实用户或人工评审验证的结论”。
 
 ## 目录约定
 
-- `AI Emotion Assistant/`：后续应用代码，当前不放研究和产品文档。
+- `AI Emotion Assistant/`：MVP 应用代码、评测集与工程脚本，不放研究和产品文档。
 - `docs/01-research/`：目标人群、场景、竞品和安全研究。
 - `docs/02-product/`：PRD和产品决策。
 - `docs/03-flows/`：用户流程和异常分支。
@@ -22,4 +22,5 @@ AI Emotion Assistant 是一个面向日常情绪压力场景的 AI 表达与行�
 5. MVP 技术决策：已确认模型/API/存储方案；60 条合成评测集、评分标准与内测门槛已建立。
 6. MVP 后端 Phase 1—2：TypeScript/Fastify 工程骨架、确定性安全链路、百炼双模型适配、严格 JSON Schema、输出审核和评测 runner 已完成。
 7. MVP 后端 Phase 3：固定模型快照已完成三轮 60 条真实调用稳定性验证；自动安全门禁通过，详见 `docs/07-implementation/mvp-phase-3-model-validation-report.md`。
-8. MVP 后端 Phase 4：进入两名评审独立人工盲评；评分完成前不宣称达到 MVP 内测发布门槛。
+8. MVP 后端 Phase 4：两名评审完成 120 份单条盲评与 7 条分歧复核；P0 为 0，合并加权均分 96.18/100，人工质量门槛通过，详见 `docs/07-implementation/mvp-phase-4-human-review-report.md`。
+9. 下一工程阶段：实现 SQLite 无正文事件存储、日志脱敏、删除回执与数据导出；未完成端到端隐私验收前，不宣称可公开发布。

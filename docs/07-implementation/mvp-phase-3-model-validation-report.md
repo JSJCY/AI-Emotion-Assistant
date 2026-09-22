@@ -4,6 +4,8 @@
 > 状态：自动化门禁通过；人工语义评分待完成
 > 固定配置：评测集 v0.3、risk-policy-v0.2、Qwen3.7 Plus 分类与生成、生成温度 0
 
+> 历史说明：本文记录 Phase 3 结束时的状态。人工盲评与分歧复核已在后续 Phase 4 完成，当前结论以 `mvp-phase-4-human-review-report.md` 为准。
+
 ## 1. 本阶段完成内容
 
 - 验证北京业务空间专属 Base URL、API Key、模型权限和严格 JSON Schema。
