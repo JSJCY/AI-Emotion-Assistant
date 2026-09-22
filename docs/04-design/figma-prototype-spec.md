@@ -1,6 +1,6 @@
 # Figma 原型规格 v0.1
 
-> 状态：已在 Figma Make 生成 Version 1 并完成核心路径检查；已知问题见 `figma-delivery-and-qa-result.md`  
+> 状态：已在 Figma Make 生成 Version 1；原型遗留问题已由产品负责人确认修正，关闭记录与待验证项见 `figma-delivery-and-qa-result.md`
 > 依据：`PRD-v0.1.md`、`user-flow.md`、三份 Mermaid 流程图  
 > 原型目标：验证“识别处境 → 选择支持方式 → 获得可编辑结果 → 采取行动 → 反馈”的最小闭环，以及高风险分流是否清晰可用。
 
