@@ -1,6 +1,6 @@
 # AI Emotion Assistant — MVP Backend
 
-安全优先的 TypeScript 后端。目前完成 Phase 4：工程骨架、确定性风险规则、固定安全响应、百炼模型适配器、结构化输出、输出审计、60 条真实模型评测以及两名评审者的人工盲评和分歧复核。SQLite 无正文事件存储、删除与导出链路尚未完成。
+安全优先的 TypeScript 后端。目前完成 Phase 5 服务端数据生命周期：固定模型与安全链路、自动与人工评测、SQLite 无正文事件存储、匿名标识哈希、元数据导出、删除回执和日志脱敏。浏览器 IndexedDB 结果卡与备份生命周期验证尚未完成。
 
 ## 环境
 
@@ -24,17 +24,21 @@ DASHSCOPE_API_KEY=你的百炼APIKey
 DASHSCOPE_BASE_URL=https://你的工作区ID.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
 DASHSCOPE_RISK_MODEL=qwen3.7-plus-2026-05-26
 DASHSCOPE_GENERATION_MODEL=qwen3.7-plus-2026-05-26
+EVENT_STORE=sqlite
+EVENT_DB_PATH=./data/ai-emotion-assistant.db
 ```
 
-北京地域当前使用工作区专属兼容地址。不要把 Key 发到聊天、写入源码或提交到 Git。
+北京地域当前使用工作区专属兼容地址。不要把 Key 发到聊天、写入源码或提交到 Git。`EVENT_STORE=sqlite` 用于启用本地 SQLite；数据库目录会自动创建，并已被 Git 忽略。
 
 默认监听 `http://127.0.0.1:3000`。
 
 ## 接口
 
 - `GET /health`：进程存活检查。
-- `GET /ready`：模型与事件存储依赖检查；SQLite 未接入前仍返回 503。
-- `POST /api/v1/respond`：情绪支持请求入口。
+- `GET /ready`：实时检查模型与 SQLite 事件存储；任一依赖未就绪时返回 503。
+- `POST /api/v1/respond`：情绪支持请求入口；可通过 `x-anonymous-id` 传入 UUID，用于匿名元数据归属。
+- `GET /api/v1/events/export`：导出该匿名标识的服务端事件元数据，必须提供 `x-anonymous-id`。
+- `DELETE /api/v1/events`：删除该匿名标识的事件元数据并返回删除回执，必须提供 `x-anonymous-id`。
 
 请求示例：
 
@@ -52,6 +56,19 @@ DASHSCOPE_GENERATION_MODEL=qwen3.7-plus-2026-05-26
 - `MODEL_PROVIDER=disabled` 时，其他输入返回 `503 SAFETY_CLASSIFIER_UNAVAILABLE`。
 - `MODEL_PROVIDER=dashscope` 时，其他输入依次调用独立风险分类和主生成模型，并经过运行时 Schema 与输出审核。
 - 供应商超时、认证失败和无效响应只返回稳定错误码，不回显供应商响应正文。
+
+### 匿名标识与数据操作
+
+客户端使用随机 UUID 作为匿名标识。服务端只保存 SHA-256 哈希，不保存原始 UUID。本地 PowerShell 可用以下方式测试：
+
+```powershell
+$anonymousId = [guid]::NewGuid().ToString()
+$headers = @{ "x-anonymous-id" = $anonymousId }
+Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:3000/api/v1/events/export" -Headers $headers
+Invoke-RestMethod -Method Delete -Uri "http://127.0.0.1:3000/api/v1/events" -Headers $headers
+```
+
+知道该 UUID 的调用方可导出或删除关联元数据。这适用于当前无登录、小范围内测，不等于公网身份认证方案。
 
 ## 质量命令
 
@@ -76,6 +93,7 @@ npm run eval:live
 
 - 不在客户端或 Git 中保存 `DASHSCOPE_API_KEY`。
 - 日志不记录消息正文、上下文、Authorization 或 Cookie。
+- 日志对 `x-anonymous-id` 执行脱敏；SQLite 不存在消息、Prompt、Response 或上下文列。
 - 普通生成必须经过独立风险分类和输出审核。
 - L2/L3 安全流程不得依赖主生成模型。
 - `.env`、数据库、构建产物和覆盖率文件均被 Git 忽略。

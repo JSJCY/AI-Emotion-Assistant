@@ -122,7 +122,8 @@ max(本地高风险规则, 风险分类模型, 输出审核)
 
 - `POST /api/v1/respond`：唯一模型入口；限长、限频、验证策略与上下文。
 - `POST /api/v1/feedback`：只传结果 ID、评分和原因枚举；默认不带正文。
-- `DELETE /api/v1/events/:anonymousId`：删除该匿名标识关联的服务端事件元数据。
+- `GET /api/v1/events/export`：根据已脱敏的 `x-anonymous-id` 请求头导出该标识关联的服务端事件元数据。
+- `DELETE /api/v1/events`：根据 `x-anonymous-id` 请求头删除关联事件元数据并返回回执。不把匿名标识放入 URL，避免进入常规访问日志。
 - `GET /api/v1/public-config`：返回模型展示名、策略版本、隐私版本和求助资源版本，不返回秘密。
 - API Key 只存在服务端环境变量 `DASHSCOPE_API_KEY`；浏览器和 Git 仓库均不得出现。
 - 北京地域兼容地址使用 `https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`；工作区 ID 与 API Key 均通过本地 `.env` 或部署秘密注入。
@@ -151,6 +152,8 @@ SQLite 只承担 MVP 的最小运营与审计元数据：
 - `deletion_receipts`：匿名 ID 哈希、删除范围、完成时间，用于验证删除动作。
 
 配置：单实例 SQLite + WAL + 版本化迁移；每日加密备份只包含上述元数据。进入多实例或需要账号同步时迁移 PostgreSQL，不改变 API 数据模型。
+
+当前已实现 SQLite、WAL、版本化迁移、哈希归属、导出、删除和删除回执。加密备份和备份删除生命周期仍待部署环境验证。
 
 ### 4.3 模型供应商日志
 

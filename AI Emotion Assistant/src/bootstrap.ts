@@ -24,8 +24,7 @@ import { NoopEventRepository } from "./infrastructure/safe-default-adapters.js";
 import { SqliteEventRepository } from "./infrastructure/sqlite-event-repository.js";
 import { SystemClock } from "./infrastructure/system-clock.js";
 import type { ReadinessState } from "./interfaces/http/app.js";
-
-const APP_VERSION = "0.2.0";
+import { APP_VERSION } from "./version.js";
 
 export interface Runtime {
   readonly respondUseCase: RespondUseCase;

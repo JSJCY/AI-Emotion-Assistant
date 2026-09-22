@@ -1,6 +1,7 @@
 import { buildRuntime } from "./bootstrap.js";
 import { loadConfig } from "./infrastructure/config.js";
 import { loadLocalEnv } from "./infrastructure/load-local-env.js";
+import { buildLoggerOptions } from "./infrastructure/logger-config.js";
 import { buildApp } from "./interfaces/http/app.js";
 
 async function main(): Promise<void> {
@@ -12,13 +13,7 @@ async function main(): Promise<void> {
     respondUseCase: runtime.respondUseCase,
     dataLifecycleUseCase: runtime.dataLifecycleUseCase,
     readiness: runtime.readiness,
-    logger: {
-      level: config.LOG_LEVEL,
-      redact: {
-        paths: ["req.headers.authorization", "req.headers.cookie", "req.headers.x-anonymous-id"],
-        censor: "[REDACTED]",
-      },
-    },
+    logger: buildLoggerOptions(config.LOG_LEVEL),
   });
 
   const shutdown = async (signal: string): Promise<void> => {

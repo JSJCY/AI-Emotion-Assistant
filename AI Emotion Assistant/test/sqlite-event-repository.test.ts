@@ -23,7 +23,7 @@ function createEvent(overrides: Partial<ResponseEvent> = {}): ResponseEvent {
     route: "PRO_SUPPORT",
     safetyAction: "SHOW_PRO_SUPPORT",
     durationMs: 125,
-    appVersion: "0.2.0",
+    appVersion: "0.4.0",
     riskPolicyVersion: "risk-policy-v0.2",
     responsePromptVersion: "response-prompt-v0.1",
     modelProvider: "dashscope",

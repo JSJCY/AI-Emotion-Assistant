@@ -2,6 +2,7 @@ import Fastify, { type FastifyReply, type FastifyServerOptions } from "fastify";
 import type { DataLifecycleUseCase } from "../../application/data-lifecycle-use-case.js";
 import { ApplicationError } from "../../application/errors.js";
 import type { RespondUseCase } from "../../application/respond-use-case.js";
+import { APP_VERSION } from "../../version.js";
 import {
   anonymousIdSchema,
   deletionReceiptSchema,
@@ -32,7 +33,7 @@ export function buildApp(options: BuildAppOptions) {
   app.get("/health", async () => ({
     status: "ok",
     service: "ai-emotion-assistant",
-    version: "0.2.0",
+    version: APP_VERSION,
   }));
 
   app.get("/ready", async (_request, reply) => {

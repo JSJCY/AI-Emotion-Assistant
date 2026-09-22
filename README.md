@@ -23,4 +23,5 @@ AI Emotion Assistant 是一个面向日常情绪压力场景的 AI 表达与行�
 6. MVP 后端 Phase 1—2：TypeScript/Fastify 工程骨架、确定性安全链路、百炼双模型适配、严格 JSON Schema、输出审核和评测 runner 已完成。
 7. MVP 后端 Phase 3：固定模型快照已完成三轮 60 条真实调用稳定性验证；自动安全门禁通过，详见 `docs/07-implementation/mvp-phase-3-model-validation-report.md`。
 8. MVP 后端 Phase 4：两名评审完成 120 份单条盲评与 7 条分歧复核；P0 为 0，合并加权均分 96.18/100，人工质量门槛通过，详见 `docs/07-implementation/mvp-phase-4-human-review-report.md`。
-9. 下一工程阶段：实现 SQLite 无正文事件存储、日志脱敏、删除回执与数据导出；未完成端到端隐私验收前，不宣称可公开发布。
+9. MVP 后端 Phase 5：SQLite 无正文事件存储、实时就绪检查、日志脱敏、匿名元数据导出和删除回执已实现，详见 `docs/07-implementation/mvp-phase-5-data-lifecycle-report.md`。
+10. 下一验收阶段：接入浏览器 IndexedDB 结果卡，完成前后端“导出/删除全部数据”流程和备份生命周期验证；在此之前不宣称可公开发布。
