@@ -23,6 +23,7 @@ async function main(): Promise<void> {
   const shutdown = async (signal: string): Promise<void> => {
     app.log.info({ signal }, "Shutting down");
     await app.close();
+    await runtime.close();
     process.exitCode = 0;
   };
 

@@ -5,7 +5,7 @@ import { respondRequestSchema, respondResultSchema } from "./schemas.js";
 
 export interface ReadinessState {
   readonly modelProvider: boolean;
-  readonly eventStore: boolean;
+  readonly eventStore: () => Promise<boolean>;
 }
 
 export interface BuildAppOptions {
@@ -28,12 +28,13 @@ export function buildApp(options: BuildAppOptions) {
   }));
 
   app.get("/ready", async (_request, reply) => {
-    const ready = options.readiness.modelProvider && options.readiness.eventStore;
+    const eventStoreReady = await options.readiness.eventStore();
+    const ready = options.readiness.modelProvider && eventStoreReady;
     return reply.code(ready ? 200 : 503).send({
       status: ready ? "ready" : "not_ready",
       checks: {
         model_provider: options.readiness.modelProvider,
-        event_store: options.readiness.eventStore,
+        event_store: eventStoreReady,
       },
     });
   });

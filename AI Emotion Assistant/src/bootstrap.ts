@@ -1,25 +1,37 @@
+import type { EventRepositoryPort, ResponseEventMetadata } from "./application/ports.js";
 import { RespondUseCase } from "./application/respond-use-case.js";
 import type { AppConfig } from "./infrastructure/config.js";
 import { DashscopeJsonClient } from "./infrastructure/dashscope/json-completion-client.js";
-import { DashscopeResponseGenerator } from "./infrastructure/dashscope/response-generator.js";
-import { DashscopeRiskClassifier } from "./infrastructure/dashscope/risk-classifier.js";
+import {
+  DashscopeResponseGenerator,
+  RESPONSE_PROMPT_VERSION,
+} from "./infrastructure/dashscope/response-generator.js";
+import {
+  DashscopeRiskClassifier,
+  RISK_CLASSIFIER_POLICY_VERSION,
+} from "./infrastructure/dashscope/risk-classifier.js";
 import { DeterministicOutputAuditor } from "./infrastructure/deterministic-output-auditor.js";
 import {
   DisabledResponseGenerator,
   DisabledRiskClassifier,
 } from "./infrastructure/disabled-model-adapters.js";
 import { NoopEventRepository } from "./infrastructure/safe-default-adapters.js";
+import { SqliteEventRepository } from "./infrastructure/sqlite-event-repository.js";
 import { SystemClock } from "./infrastructure/system-clock.js";
 import type { ReadinessState } from "./interfaces/http/app.js";
+
+const APP_VERSION = "0.2.0";
 
 export interface Runtime {
   readonly respondUseCase: RespondUseCase;
   readonly readiness: ReadinessState;
+  close(): Promise<void>;
 }
 
 export function buildRuntime(config: AppConfig): Runtime {
-  const eventRepository = new NoopEventRepository();
+  const eventRepository = buildEventRepository(config);
   const outputAuditor = new DeterministicOutputAuditor();
+  const eventMetadata = buildEventMetadata(config);
 
   if (config.MODEL_PROVIDER === "dashscope") {
     const client = new DashscopeJsonClient({
@@ -38,9 +50,14 @@ export function buildRuntime(config: AppConfig): Runtime {
         ),
         outputAuditor,
         eventRepository,
+        eventMetadata,
         clock: new SystemClock(),
       }),
-      readiness: { modelProvider: true, eventStore: false },
+      readiness: {
+        modelProvider: true,
+        eventStore: () => eventRepository.isReady(),
+      },
+      close: () => eventRepository.close(),
     };
   }
 
@@ -50,9 +67,32 @@ export function buildRuntime(config: AppConfig): Runtime {
       responseGenerator: new DisabledResponseGenerator(),
       outputAuditor,
       eventRepository,
+      eventMetadata,
       clock: new SystemClock(),
     }),
-    readiness: { modelProvider: false, eventStore: false },
+    readiness: {
+      modelProvider: false,
+      eventStore: () => eventRepository.isReady(),
+    },
+    close: () => eventRepository.close(),
+  };
+}
+
+function buildEventRepository(config: AppConfig): EventRepositoryPort {
+  return config.EVENT_STORE === "sqlite"
+    ? new SqliteEventRepository(config.EVENT_DB_PATH)
+    : new NoopEventRepository();
+}
+
+function buildEventMetadata(config: AppConfig): ResponseEventMetadata {
+  return {
+    appVersion: APP_VERSION,
+    riskPolicyVersion: RISK_CLASSIFIER_POLICY_VERSION,
+    responsePromptVersion: RESPONSE_PROMPT_VERSION,
+    modelProvider: config.MODEL_PROVIDER,
+    riskModel: config.MODEL_PROVIDER === "dashscope" ? config.DASHSCOPE_RISK_MODEL : null,
+    generationModel:
+      config.MODEL_PROVIDER === "dashscope" ? config.DASHSCOPE_GENERATION_MODEL : null,
   };
 }
 

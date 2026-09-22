@@ -74,6 +74,8 @@ const systemPrompt = `你是“AI 情绪表达与行动支持助手”，只处�
 当风险等级为 L1 时，可以温和建议现实支持或合格专业人员，并设置 SHOW_PRO_SUPPORT；不要生成紧急号码或紧急流程。
 遵循 preferred_strategy；未指定时选择最贴合当下需要的一种主策略。一次最多提出一个关键问题。`;
 
+export const RESPONSE_PROMPT_VERSION = "response-prompt-v0.1";
+
 export class DashscopeResponseGenerator implements ResponseGeneratorPort {
   constructor(
     private readonly client: JsonCompletionClientPort,

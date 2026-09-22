@@ -36,13 +36,29 @@ function createDependencies() {
   };
   const eventRepository: EventRepositoryPort = {
     recordResponse: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockResolvedValue(true),
+    close: vi.fn().mockResolvedValue(undefined),
   };
   const clock: ClockPort = {
     now: () => new Date("2026-09-21T00:00:00.000Z"),
     monotonicMs: vi.fn().mockReturnValueOnce(100).mockReturnValue(125),
   };
 
-  return { riskClassifier, responseGenerator, outputAuditor, eventRepository, clock };
+  return {
+    riskClassifier,
+    responseGenerator,
+    outputAuditor,
+    eventRepository,
+    eventMetadata: {
+      appVersion: "test",
+      riskPolicyVersion: "risk-policy-test",
+      responsePromptVersion: "response-prompt-test",
+      modelProvider: "disabled" as const,
+      riskModel: null,
+      generationModel: null,
+    },
+    clock,
+  };
 }
 
 describe("RespondUseCase", () => {

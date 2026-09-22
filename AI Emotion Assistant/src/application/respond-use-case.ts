@@ -12,6 +12,7 @@ import type {
   EventRepositoryPort,
   OutputAuditorPort,
   RespondCommand,
+  ResponseEventMetadata,
   ResponseGeneratorPort,
   RiskClassifierPort,
 } from "./ports.js";
@@ -21,6 +22,7 @@ export interface RespondUseCaseDependencies {
   readonly responseGenerator: ResponseGeneratorPort;
   readonly outputAuditor: OutputAuditorPort;
   readonly eventRepository: EventRepositoryPort;
+  readonly eventMetadata: ResponseEventMetadata;
   readonly clock: ClockPort;
 }
 
@@ -33,7 +35,7 @@ export class RespondUseCase {
 
     if (requiresFixedSafetyResponse(localAssessment)) {
       const response = buildFixedSafetyResponse(command.requestId, localAssessment);
-      await this.recordEvent(response, startedAt);
+      await this.recordEvent(command, response, startedAt);
       return response;
     }
 
@@ -42,7 +44,7 @@ export class RespondUseCase {
 
     if (requiresFixedSafetyResponse(effectiveAssessment)) {
       const response = buildFixedSafetyResponse(command.requestId, effectiveAssessment);
-      await this.recordEvent(response, startedAt);
+      await this.recordEvent(command, response, startedAt);
       return response;
     }
 
@@ -76,18 +78,24 @@ export class RespondUseCase {
       actions: [],
     };
 
-    await this.recordEvent(response, startedAt);
+    await this.recordEvent(command, response, startedAt);
     return response;
   }
 
-  private async recordEvent(response: RespondResult, startedAt: number): Promise<void> {
+  private async recordEvent(
+    command: RespondCommand,
+    response: RespondResult,
+    startedAt: number,
+  ): Promise<void> {
     await this.dependencies.eventRepository.recordResponse({
       requestId: response.request_id,
+      anonymousIdHash: command.anonymousIdHash ?? null,
       riskLevel: response.risk_level,
       signalCodes: response.signal_codes,
       route: response.route,
       safetyAction: response.safety_action,
       durationMs: Math.max(0, this.dependencies.clock.monotonicMs() - startedAt),
+      ...this.dependencies.eventMetadata,
       createdAt: this.dependencies.clock.now().toISOString(),
     });
   }

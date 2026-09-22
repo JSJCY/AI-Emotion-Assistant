@@ -15,4 +15,12 @@ export class NoopEventRepository implements EventRepositoryPort {
   recordResponse(): Promise<void> {
     return Promise.resolve();
   }
+
+  isReady(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  close(): Promise<void> {
+    return Promise.resolve();
+  }
 }

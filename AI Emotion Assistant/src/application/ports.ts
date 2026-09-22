@@ -11,6 +11,7 @@ export interface RespondCommand {
   readonly message: string;
   readonly context: readonly ConversationTurn[];
   readonly preferredStrategy?: "listen" | "clarify" | "express" | "act";
+  readonly anonymousIdHash?: string;
 }
 
 export interface RiskClassifierPort {
@@ -32,16 +33,34 @@ export interface OutputAuditorPort {
 
 export interface ResponseEvent {
   readonly requestId: string;
+  readonly anonymousIdHash: string | null;
   readonly riskLevel: RiskLevel;
   readonly signalCodes: readonly SignalCode[];
   readonly route: ResponseRoute;
   readonly safetyAction: RespondResult["safety_action"];
   readonly durationMs: number;
+  readonly appVersion: string;
+  readonly riskPolicyVersion: string;
+  readonly responsePromptVersion: string;
+  readonly modelProvider: "disabled" | "dashscope";
+  readonly riskModel: string | null;
+  readonly generationModel: string | null;
   readonly createdAt: string;
 }
 
 export interface EventRepositoryPort {
   recordResponse(event: ResponseEvent): Promise<void>;
+  isReady(): Promise<boolean>;
+  close(): Promise<void>;
+}
+
+export interface ResponseEventMetadata {
+  readonly appVersion: string;
+  readonly riskPolicyVersion: string;
+  readonly responsePromptVersion: string;
+  readonly modelProvider: "disabled" | "dashscope";
+  readonly riskModel: string | null;
+  readonly generationModel: string | null;
 }
 
 export interface ClockPort {

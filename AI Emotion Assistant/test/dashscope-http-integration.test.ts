@@ -55,6 +55,8 @@ describe("DashScope HTTP integration with mocked provider", () => {
         MODEL_PROVIDER: "dashscope",
         DASHSCOPE_API_KEY: "test-key-not-real",
         DASHSCOPE_BASE_URL: "https://workspace.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+        EVENT_STORE: "sqlite",
+        EVENT_DB_PATH: ":memory:",
       }),
     );
     const app = buildApp({
@@ -63,6 +65,13 @@ describe("DashScope HTTP integration with mocked provider", () => {
     });
 
     try {
+      const ready = await app.inject({ method: "GET", url: "/ready" });
+      expect(ready.statusCode).toBe(200);
+      expect(ready.json()).toMatchObject({
+        status: "ready",
+        checks: { model_provider: true, event_store: true },
+      });
+
       const response = await app.inject({
         method: "POST",
         url: "/api/v1/respond",
@@ -85,6 +94,7 @@ describe("DashScope HTTP integration with mocked provider", () => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
     } finally {
       await app.close();
+      await runtime.close();
     }
   });
 });

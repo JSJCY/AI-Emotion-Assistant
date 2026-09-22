@@ -17,12 +17,20 @@ function createApp() {
     responseGenerator: new DisabledResponseGenerator(),
     outputAuditor: new BlockAllOutputAuditor(),
     eventRepository: new NoopEventRepository(),
+    eventMetadata: {
+      appVersion: "test",
+      riskPolicyVersion: "risk-policy-test",
+      responsePromptVersion: "response-prompt-test",
+      modelProvider: "disabled",
+      riskModel: null,
+      generationModel: null,
+    },
     clock: new SystemClock(),
   });
 
   return buildApp({
     respondUseCase: useCase,
-    readiness: { modelProvider: false, eventStore: false },
+    readiness: { modelProvider: false, eventStore: () => Promise.resolve(false) },
   });
 }
 

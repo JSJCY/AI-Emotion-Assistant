@@ -7,6 +7,8 @@ describe("configuration", () => {
 
     expect(config.MODEL_PROVIDER).toBe("disabled");
     expect(config.DASHSCOPE_API_KEY).toBeUndefined();
+    expect(config.EVENT_STORE).toBe("disabled");
+    expect(config.EVENT_DB_PATH).toBe("./data/ai-emotion-assistant.db");
   });
 
   it("rejects DashScope mode when credentials or workspace endpoint are missing", () => {
@@ -34,5 +36,15 @@ describe("configuration", () => {
           "https://YOUR_WORKSPACE_ID.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
       }),
     ).toThrow();
+  });
+
+  it("accepts the SQLite event store without introducing another secret", () => {
+    const config = loadConfig({
+      EVENT_STORE: "sqlite",
+      EVENT_DB_PATH: ":memory:",
+    });
+
+    expect(config.EVENT_STORE).toBe("sqlite");
+    expect(config.EVENT_DB_PATH).toBe(":memory:");
   });
 });
