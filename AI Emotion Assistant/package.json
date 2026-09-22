@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:live-model": "tsx scripts/live-model-smoke.ts",
     "eval:live": "tsx scripts/run-live-eval.ts",
+    "eval:human-packet": "tsx scripts/export-human-review.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

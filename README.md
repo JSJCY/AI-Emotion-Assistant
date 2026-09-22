@@ -18,7 +18,8 @@ AI Emotion Assistant 是一个面向日常情绪压力场景的 AI 表达与行�
 1. 目标人群与核心场景：桌面研究版已定义，待用户访谈验证。
 2. 竞品/替代方案与安全风险：桌面研究版已完成。
 3. PRD 和用户流程：v0.1 已完成，并完成结构与流程图基础检查。
-4. Figma 可交互原型：Version 1 已完成并验证行动、表达、隐私与安全路径；链接与已知问题见 `docs/04-design/figma-delivery-and-qa-result.md`。
-5. MVP 技术决策：已确认模型/API/存储方案；60 条首版合成评测集、评分标准与内测门槛已建立，等待接入实现后运行基线。
-6. MVP 后端 Phase 1：TypeScript/Fastify 工程骨架、确定性安全链路、固定安全响应和 22 个自动测试已完成；真实百炼适配器与 SQLite 尚未接入。
-7. MVP 后端 Phase 2：百炼双模型适配、严格 JSON Schema、输出审核、真实冒烟脚本和 60 条评测 runner 已实现；真实账号连通性等待本机凭据验证，SQLite 尚未接入。
+4. Figma 可交互原型：Version 1 已完成；原型遗留问题已由产品负责人确认修正，关闭记录和仍需补证的可访问性测试见 `docs/04-design/figma-delivery-and-qa-result.md`。
+5. MVP 技术决策：已确认模型/API/存储方案；60 条合成评测集、评分标准与内测门槛已建立。
+6. MVP 后端 Phase 1—2：TypeScript/Fastify 工程骨架、确定性安全链路、百炼双模型适配、严格 JSON Schema、输出审核和评测 runner 已完成。
+7. MVP 后端 Phase 3：固定模型快照已完成三轮 60 条真实调用稳定性验证；自动安全门禁通过，详见 `docs/07-implementation/mvp-phase-3-model-validation-report.md`。
+8. MVP 后端 Phase 4：进入两名评审独立人工盲评；评分完成前不宣称达到 MVP 内测发布门槛。
